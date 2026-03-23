@@ -10,12 +10,12 @@ Work in Progress
 
 Минимальный ф-ционал:
 
-- авторизация с сохранением сессии
-- logout
-- открытие директории игры
-- показ версии игры (current/previous) - может использовать multiversions?
-- [+] поведение при запуске (свернуть/закрыть/ничего не делать)
-- autoupdate или проверка обновлений при запуске
+- authentication: login/logout and save token;
+- открытие директории игры;
+- показ версии игры (current/previous) - может использовать multiversions?;
+- [+] поведение при запуске (свернуть/закрыть/ничего не делать);
+- [+] running time elapsed;
+- autoupdate или проверка обновлений при запуске.
 
 Что не будет реализованно из нативного лаунчера: multiaccounts; news; social linkds; patchline; i18 и выбор языка; launch previous; uninstall;
 

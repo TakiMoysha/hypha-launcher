@@ -1,0 +1,66 @@
+:root {
+	--color-primary: oklch(0.7 0.15 260);
+	--color-primary-content: oklch(0.95 0.02 280);
+	--color-primary-focus: oklch(0.6 0.15 260);
+
+	--color-secondary: oklch(0.7 0.15 160);
+	--color-secondary-content: oklch(0.95 0.02 280);
+	--color-secondary-focus: oklch(0.6 0.15 160);
+
+	--color-accent: oklch(0.8 0.18 80);
+	--color-accent-content: oklch(0.15 0.05 80);
+	--color-accent-focus: oklch(0.7 0.18 80);
+
+	--color-base-100: oklch(0.18 0.02 260);
+	--color-base-200: oklch(0.23 0.02 260);
+	--color-base-300: oklch(0.28 0.02 260);
+	--color-base-content: oklch(0.9 0.02 260);
+
+	--color-info: oklch(0.75 0.12 220);
+	--color-info-content: oklch(0.1 0.01 220);
+
+	--color-success: oklch(0.75 0.15 145);
+	--color-success-content: oklch(0.1 0.01 145);
+
+	--color-warning: oklch(0.85 0.15 85);
+	--color-warning-content: oklch(0.15 0.05 85);
+
+	--color-error: oklch(0.75 0.18 25);
+	--color-error-content: oklch(0.1 0.01 25);
+}
+
+[data-theme="dark"] {
+	--color-primary: oklch(0.7 0.15 260);
+	--color-primary-content: oklch(0.95 0.02 280);
+	--color-primary-focus: oklch(0.6 0.15 260);
+
+	--color-secondary: oklch(0.7 0.15 160);
+	--color-secondary-content: oklch(0.95 0.02 280);
+	--color-secondary-focus: oklch(0.6 0.15 160);
+
+	--color-accent: oklch(0.8 0.18 80);
+	--color-accent-content: oklch(0.15 0.05 80);
+	--color-accent-focus: oklch(0.7 0.18 80);
+
+	--color-base-100: oklch(0.18 0.02 260);
+	--color-base-200: oklch(0.23 0.02 260);
+	--color-base-300: oklch(0.28 0.02 260);
+	--color-base-content: oklch(0.9 0.02 260);
+
+	--color-info: oklch(0.75 0.12 220);
+	--color-info-content: oklch(0.1 0.01 220);
+
+	--color-success: oklch(0.75 0.15 145);
+	--color-success-content: oklch(0.1 0.01 145);
+
+	--color-warning: oklch(0.85 0.15 85);
+	--color-warning-content: oklch(0.15 0.05 85);
+
+	--color-error: oklch(0.75 0.18 25);
+	--color-error-content: oklch(0.1 0.01 25);
+}
+
+/* from unocss styles */
+.palette-block {
+  @apply px-4 py-2 my-2 text-center border border-emerald-700/20;
+}

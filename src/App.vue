@@ -1,160 +1,70 @@
 <script setup lang="ts">
-import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
-
-const greetMsg = ref("");
-const name = ref("");
-
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value });
-}
 </script>
 
 <template>
-  <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
+  <main class="flex min-h-screen flex-col bg-base-200">
+    <div class="">
+      <header class="shadow-sm">
+        <div class="flex items-center justify-around justify-items-center max-w-6xl mx-auto p-4"></div>
+      </header>
+      <!-- palette -->
+      <section class="flex flex-col bg-background mx-auto max-w-6xl p-6">
+        <h4 class="mt-4 text-2xl text-base-content">Base</h4>
+        <div class="palette-block text-primary-content bg-primary">
+          text-primary-content + bg-primary
+        </div>
+        <div class="palette-block text-secondary-content bg-secondary">
+          text-secondary-content + bg-secondary
+        </div>
+        <div class="palette-block text-accent-content bg-accent">
+          text-accent-content + bg-accent
+        </div>
+        <div class="palette-block text-neutral-content bg-neutral">
+          text-neutral-content + bg-neutral
+        </div>
 
-    <div class="row">
-      <a href="https://vite.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
+        <h4 class="mt-4 text-2xl text-base-content">Signals</h4>
+        <div class="palette-block bg-info text-info-content">
+          text-info-content + bg-info
+        </div>
+        <div class="palette-block bg-success text-success-content">
+          text-success-content + bg-success
+        </div>
+        <div class="palette-block bg-warning text-warning-content">
+          text-warning-content + bg-warning
+        </div>
+        <div class="palette-block bg-error text-error-content">
+          text-error-content + bg-error
+        </div>
+
+        <h4 class="mt-4 text-2xl text-base-content">Background & Surface</h4>
+        <div class="palette-block text-base-content bg-base-100">
+          text-base-content + bg-base-100
+        </div>
+        <div class="palette-block text-base-content bg-base-200">
+          text-base-content + bg-base-200
+        </div>
+        <div class="palette-block text-base-content bg-base-300">
+          text-base-content + bg-base-300
+        </div>
+        <div class="palette-block text-base-content bg-base-400">
+          text-base-content + bg-base-400
+        </div>
+
+        <h4 class="mt-4 text-2xl text-base-content">Fonts & Sizes</h4>
+        <div class="palette-block text-base-content font-sans">
+          Font Sans <span class="uppercase">UppserCase</span>
+        </div>
+        <div class="palette-block text-base-content font-mono">
+          Font Mono <span class="uppercase">UppserCase</span>
+        </div>
+        <div class="px-4 py-2 my-2 text-center border border-emerald-700/20">
+        <div class="palette-block text-base-content font-digital">
+          Font Digital <span class="uppercase">UppserCase</span>
+        </div>
+        </div>
+      </section>
     </div>
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
-
-    <form class="row" @submit.prevent="greet">
-      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
-      <button type="submit">Greet</button>
-    </form>
-    <p>{{ greetMsg }}</p>
   </main>
 </template>
-
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-
-</style>
-<style>
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-
-</style>
