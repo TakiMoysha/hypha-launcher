@@ -59,12 +59,18 @@ import { invoke } from "@tauri-apps/api/core";
         <div class="palette-block text-base-content font-mono">
           Font Mono <span class="uppercase">UppserCase</span>
         </div>
-        <div class="px-4 py-2 my-2 text-center border border-emerald-700/20">
         <div class="palette-block text-base-content font-digital">
           Font Digital <span class="uppercase">UppserCase</span>
-        </div>
         </div>
       </section>
     </div>
   </main>
 </template>
+
+<style scoped>
+@reference "./assets/css/main.css";
+
+.palette-block {
+  @apply px-4 py-2 my-2 text-center border border-emerald-600/20;
+}
+</style>
