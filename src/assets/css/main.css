@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+@theme inline {
   --color-primary: oklch(0.65 0.15 260);
   --color-primary-content: oklch(0.98 0.01 260);
   --color-primary-focus: oklch(0.55 0.15 260);
@@ -34,8 +34,8 @@
   --color-error: oklch(0.65 0.18 25);
   --color-error-content: oklch(0.98 0.01 25);
 
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "Fira Code", "Cascadia Code", monospace;
+  --font-sans: "Satoshi", system-ui, sans-serif;
+  --font-mono: "Satoshi", "Cascadia Code", monospace;
   --font-digital: "Share Tech Mono", monospace;
 }
 
