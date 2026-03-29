@@ -1,5 +1,49 @@
-import { createApp } from "vue";
-import App from "./App.vue";
 import "./assets/css/main.css";
 
-createApp(App).mount("#app");
+import App from "./App.vue";
+
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
+
+const pinia = createPinia();
+const router = createRouter({
+	// history: createWebHashHistory(),
+	history: createWebHistory(),
+	routes: [
+		{ name: "home", path: "/", component: import("./pages/HomeMain.vue") },
+		{
+			name: "settings:mods",
+			path: "/settings/mods",
+			component: import("./pages/WorkInProgress.vue"),
+			children: [
+				{
+					name: "settings:mods:details",
+					path: "/:id",
+					component: import("./pages/WorkInProgress.vue"),
+				},
+			],
+		},
+
+		{
+			name: "dev",
+			path: "/dev",
+			component: import("./pages/DebugScreen.vue"),
+			children: [
+				{
+					name: "dev:style-preview",
+					path: "/style-preview",
+					component: import("./components/StylePreview.vue"),
+				},
+			],
+		},
+
+		{
+			name: "not-found",
+			path: "/:catchAll(.*)*",
+			redirect: { name: "home" },
+		},
+	],
+});
+
+createApp(App).use(pinia).use(router).mount("#app");
