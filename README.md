@@ -34,6 +34,7 @@ What i want add:
 - [?] char preview/preset;
 - [?] launch lock screen;
 - [?] custom background;
+- table of mods (cool selector, acsessible, multiselect, inspect)
 
 ```scheme
 hypha-launcher/
@@ -71,5 +72,7 @@ hypha-launcher/
 
 ## Resources
 
+- [Mod Organizer 2 / github.com](https://github.com/ModOrganizer2/modorganizer)
+- [Vortex Mod Manager / github.com](https://github.com/Nexus-Mods/Vortex/)
 - [Pandoralauncher / github.com](https://github.com/Moulberry/PandoraLauncher/)
 - TLauncher

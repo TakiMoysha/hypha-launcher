@@ -30,4 +30,10 @@ export default defineConfig(async () => ({
 			ignored: ["crates/", "target/"],
 		},
 	},
+
+	resolve: {
+		alias: {
+			"@": "./src",
+		},
+	}
 }));
