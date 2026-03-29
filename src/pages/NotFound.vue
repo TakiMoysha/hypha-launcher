@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ExclamationTriangleIcon } from "@heroicons/vue";
+// import { ExclamationTriangleIcon } from "@heroicons/vue";
 import { RouterLink } from "vue-router";
 </script>
 
 <template>
   <div class="max-w-md text-center">
-    <ExclamationTriangleIcon></ExclamationTriangleIcon>
 
     <h2 class="mt-6 text-2xl font-bold">Page Not Found</h2>
 
@@ -20,7 +19,7 @@ import { RouterLink } from "vue-router";
       Go to Home
     </button>
 
-    <p class="mt-6 text-sm text-gray-700 dark:text-gray-200">
+    <p class="mt-6 text-sm text-neutral-content">
       If You think this is a bug, you can create issue on
       <a href="#" class="underline hover:text-neutral">github page</a>.
     </p>

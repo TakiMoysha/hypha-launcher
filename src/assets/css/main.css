@@ -14,7 +14,7 @@
   --color-accent-focus: oklch(0.65 0.18 80);
 
   --color-neutral: oklch(0.4 0.02 260);
-  --color-neutral-content: oklch(0.98 0.01 260);
+  --color-neutral-content: oklch(0.77 0.01 260);
   --color-neutral-focus: oklch(0.3 0.02 260);
 
   --color-base-100: oklch(0.18 0.02 260);
@@ -41,7 +41,7 @@
 
 body {
   background: var(--color-base-200);
-  color: var(--color-neutral-content);
+  color: var(--color-base-content);
 }
 
 ::-webkit-scrollbar {

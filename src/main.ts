@@ -4,12 +4,11 @@ import App from "./App.vue";
 
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 
 const pinia = createPinia();
 const router = createRouter({
-	// history: createWebHashHistory(),
-	history: createWebHistory(),
+	history: createWebHashHistory(),
 	routes: [
 		{ name: "home", path: "/", component: import("./pages/HomeMain.vue") },
 		{
@@ -19,7 +18,7 @@ const router = createRouter({
 			children: [
 				{
 					name: "settings:mods:details",
-					path: "/:id",
+					path: ":id",
 					component: import("./pages/WorkInProgress.vue"),
 				},
 			],
@@ -30,18 +29,23 @@ const router = createRouter({
 			path: "/dev",
 			component: import("./pages/DebugScreen.vue"),
 			children: [
-				{
-					name: "dev:style-preview",
-					path: "/style-preview",
-					component: import("./components/StylePreview.vue"),
-				},
+				// {
+				// 	name: "dev:style-preview",
+				// 	path: "style-preview",
+				// 	component: import("./components/StylePreview.vue"),
+				// },
 			],
 		},
 
 		{
+			name: "error:not-found",
+			path: "/error/not-found",
+			component: import("./pages/NotFound.vue"),
+		},
+		{
 			name: "not-found",
 			path: "/:catchAll(.*)*",
-			redirect: { name: "home" },
+			redirect: { name: "error:not-found" },
 		},
 	],
 });

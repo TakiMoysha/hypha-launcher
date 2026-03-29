@@ -4,6 +4,8 @@ import ScreenLayout from "./layouts/ScreenLayout.vue";
 
 <template>
   <ScreenLayout>
-    <RouterView />
+    <template #content>
+      <RouterView />
+    </template>
   </ScreenLayout>
 </template>
