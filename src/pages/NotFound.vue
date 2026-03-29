@@ -14,12 +14,12 @@ import { RouterLink } from "vue-router";
         We couldn't find the page you're looking for.
       </p>
 
-      <RouterLink to="/"><button type="button"></button></RouterLink>
-
-      <button type="button"
-        class="mt-6 block w-full rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-content transition-colors hover:bg-accent">
-        Go to home page
-      </button>
+      <RouterLink to="/">
+        <button type="button"
+          class="mt-6 block w-full rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-content transition-colors hover:bg-accent">
+          Go to home page
+        </button>
+      </RouterLink>
 
       <p class="mt-6 text-sm text-neutral-content">
         If You think this is a bug, you can create issue on
