@@ -23,20 +23,7 @@ const router = createRouter({
 				},
 			],
 		},
-
-		{
-			name: "dev",
-			path: "/dev",
-			component: import("./pages/DebugScreen.vue"),
-			children: [
-				// {
-				// 	name: "dev:style-preview",
-				// 	path: "style-preview",
-				// 	component: import("./components/StylePreview.vue"),
-				// },
-			],
-		},
-
+		// errors
 		{
 			name: "error:not-found",
 			path: "/error/not-found",
@@ -46,6 +33,18 @@ const router = createRouter({
 			name: "not-found",
 			path: "/:catchAll(.*)*",
 			redirect: { name: "error:not-found" },
+		},
+		// dev-only
+		{
+			name: "dev",
+			path: "/dev",
+			component: import("./pages/DebugScreen.vue"),
+			children: [],
+		},
+		{
+			name: "dev:style-preview",
+			path: "/dev/style-preview",
+			component: import("./components/StylePreview.vue"),
 		},
 	],
 });
