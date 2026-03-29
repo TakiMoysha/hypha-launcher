@@ -3,7 +3,11 @@ import { invoke } from "@tauri-apps/api/core";
 </script>
 
 <template>
-  <main class="flex min-h-screen flex-col bg-base-200">
+  <div class="flex min-h-screen flex-col">
+    <footer class="shadow-sm bg-base-100">
+      <div class="flex items-center justify-around justify-items-center max-w-6xl mx-auto p-4"></div>
+    </footer>
+
     <div class="">
       <!-- palette -->
       <section class="flex flex-col bg-background mx-auto max-w-6xl p-6">
@@ -61,10 +65,7 @@ import { invoke } from "@tauri-apps/api/core";
         </div>
       </section>
     </div>
-    <footer class="shadow-sm bg-base-100">
-      <div class="flex items-center justify-around justify-items-center max-w-6xl mx-auto p-4"></div>
-    </footer>
-  </main>
+  </div>
 </template>
 
 <style scoped>
