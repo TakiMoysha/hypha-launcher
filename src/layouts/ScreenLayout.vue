@@ -18,6 +18,7 @@
         <slot name="content"> Container Area </slot>
       </main>
       <aside class="w-1/6 p-4 shrink-0 overflow-auto mx-1 my-2 flex flex-col gap-2">
+        <router-link class="hover:underline border-b-2 p-2" to="/">home</router-link>
         <router-link class="hover:underline border-b-2 p-2" to="/dev/style-preview">style</router-link>
         <router-link class="hover:underline border-b-2 p-2" to="/dev">dev</router-link>
         <router-link class="hover:underline border-b-2 p-2" to="/not-found-page">404</router-link>

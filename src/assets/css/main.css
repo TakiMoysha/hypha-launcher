@@ -1,39 +1,46 @@
 @import "tailwindcss";
 
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(12% 0.042 264.695);
+  --color-base-200: oklch(20% 0.042 265.755);
+  --color-base-300: oklch(27% 0.041 260.031);
+  --color-base-content: oklch(96% 0.007 247.896);
+  --color-primary: oklch(62% 0.214 259.815);
+  --color-primary-content: oklch(97% 0.014 254.604);
+  /* --color-primary-focus: oklch(0.55 0.15 260); */
+  --color-secondary: oklch(70% 0.14 182.503);
+  --color-secondary-content: oklch(98% 0.014 180.72);
+  /* --color-secondary-focus: oklch(0.55 0.15 160); */
+  --color-accent: oklch(70% 0.213 47.604);
+  --color-accent-content: oklch(98% 0.016 73.684);
+  /* --color-accent-focus: oklch(0.65 0.18 80); */
+  --color-neutral: oklch(27% 0.041 260.031);
+  --color-neutral-content: oklch(98% 0.003 247.858);
+  /* --color-neutral-focus: oklch(0.3 0.02 260); */
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(77% 0.152 181.912);
+  --color-success-content: oklch(27% 0.046 192.524);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(27% 0.077 45.635);
+  --color-error: oklch(71% 0.202 349.761);
+  --color-error-content: oklch(28% 0.109 3.907);
+  --radius-selector: 1rem;
+  --radius-field: 1rem;
+  --radius-box: 0.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
 @theme inline {
-  --color-primary: oklch(0.65 0.15 260);
-  --color-primary-content: oklch(0.98 0.01 260);
-  --color-primary-focus: oklch(0.55 0.15 260);
-
-  --color-secondary: oklch(0.65 0.15 160);
-  --color-secondary-content: oklch(0.98 0.01 160);
-  --color-secondary-focus: oklch(0.55 0.15 160);
-
-  --color-accent: oklch(0.75 0.18 80);
-  --color-accent-content: oklch(0.2 0.05 80);
-  --color-accent-focus: oklch(0.65 0.18 80);
-
-  --color-neutral: oklch(0.4 0.02 260);
-  --color-neutral-content: oklch(0.77 0.01 260);
-  --color-neutral-focus: oklch(0.3 0.02 260);
-
-  --color-base-100: oklch(0.18 0.02 260);
-  --color-base-200: oklch(0.23 0.02 260);
-  --color-base-300: oklch(0.30 0.02 260);
-  --color-base-content: oklch(0.9 0.02 260);
-
-  --color-info: oklch(0.7 0.12 220);
-  --color-info-content: oklch(0.98 0.01 220);
-
-  --color-success: oklch(0.7 0.15 145);
-  --color-success-content: oklch(0.98 0.01 145);
-
-  --color-warning: oklch(0.8 0.15 85);
-  --color-warning-content: oklch(0.2 0.05 85);
-
-  --color-error: oklch(0.65 0.18 25);
-  --color-error-content: oklch(0.98 0.01 25);
-
   --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "Satoshi", "Cascadia Code", monospace;
   --font-digital: "Share Tech Mono", monospace;

@@ -36,12 +36,6 @@ const router = createRouter({
 		},
 		// dev-only
 		{
-			name: "dev",
-			path: "/dev",
-			component: import("./pages/DebugScreen.vue"),
-			children: [],
-		},
-		{
 			name: "dev:style-preview",
 			path: "/dev/style-preview",
 			component: import("./components/StylePreview.vue"),
