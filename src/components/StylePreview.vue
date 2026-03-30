@@ -49,9 +49,6 @@ import { invoke } from "@tauri-apps/api/core";
         <div class="palette-block text-base-content bg-base-300">
           text-base-content + bg-base-300
         </div>
-        <div class="palette-block text-base-content bg-base-400">
-          text-base-content + bg-base-400
-        </div>
 
         <h4 class="mt-4 text-2xl text-base-content">Fonts & Sizes</h4>
         <div class="palette-block text-base-content font-sans">
