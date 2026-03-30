@@ -25,3 +25,6 @@ dist-ssr
 
 target/
 tmp/
+
+*storybook.log
+storybook-static
