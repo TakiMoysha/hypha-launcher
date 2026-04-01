@@ -34,10 +34,26 @@ const router = createRouter({
 			path: "/:catchAll(.*)*",
 			redirect: { name: "error:not-found" },
 		},
-		// dev-only
+		// dev-server
 		{
-			name: "dev:style-preview",
-			path: "/dev/style-preview",
+			name: "dev:index",
+			path: "/dev",
+			component: import("./pages/DevMain.vue"),
+		},
+		{
+			name: "dev:server",
+			path: "/dev/server",
+			component: import("./pages/DevServerMain.vue"),
+		},
+		{
+			name: "dev:inspect",
+			path: "/dev/inspect",
+			component: import("./pages/WorkInProgress.vue")
+		},
+		// debug (not for production)
+		{
+			name: "debug:style-preview",
+			path: "/debug/style-preview",
 			component: import("./components/StylePreview.vue"),
 		},
 	],
