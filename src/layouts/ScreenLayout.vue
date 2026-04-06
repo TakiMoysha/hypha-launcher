@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { SettingsIcon } from "@lucide/vue";
 import DiscordIcon from "@/assets/icons/discord.svg?raw";
 import GithubIcon from "@/assets/icons/github.svg?raw";
-
-import { useTemplateRef } from "vue";
-
-const modalStartupParams = useTemplateRef("modal_startup_params");
+import RunClientButtonGroup from "@/components/RunClientButtonGroup.vue";
 </script>
 
 <template>
@@ -25,63 +21,29 @@ const modalStartupParams = useTemplateRef("modal_startup_params");
       <main class="flex-1 p-4 overflow-auto mx-1 my-2">
         <slot name="content"> Container Area </slot>
       </main>
-      <aside
-        class="w-1/6 p-4 shrink-0 overflow-auto mx-1 my-2 flex flex-col gap-2"
-      >
-        <router-link class="hover:underline border-b-2 p-2" to="/"
-          >home</router-link
-        >
-        <router-link class="hover:underline border-b-2 p-2" to="/dev"
-          >dev</router-link
-        >
-        <router-link class="hover:underline border-b-2 p-2" to="/dev/server"
-          >server</router-link
-        >
-        <router-link
-          class="hover:underline border-b-2 p-2"
-          to="/debug/style-preview"
-          >style</router-link
-        >
-        <router-link class="hover:underline border-b-2 p-2" to="/not-found-page"
-          >404</router-link
-        >
+
+
+      <aside class="w-1/6 p-4 shrink-0 overflow-auto mx-1 my-2 flex flex-col gap-2">
+        <nav class="navbar w-full bg-base-100">
+
+        </nav>
+
+        <router-link class="hover:underline border-b-2 p-2" to="/">home</router-link>
+        <router-link class="hover:underline border-b-2 p-2" to="/dev">dev</router-link>
+        <router-link class="hover:underline border-b-2 p-2" to="/dev/server">server</router-link>
+        <router-link class="hover:underline border-b-2 p-2" to="/debug/style-preview">style</router-link>
+        <router-link class="hover:underline border-b-2 p-2" to="/not-found-page">404</router-link>
       </aside>
     </div>
 
     <footer class="p-4 shrink-0 min-h-16">
       <div class="flex justify-between">
-        <div class="join">
-          <button
-            class="join-item btn bg-primary"
-            type="button"
-            name="start-client"
-          >
-            Run Client
-          </button>
-          <button
-            class="join-item btn bg-primary"
-            type="button"
-            name="start-params"
-            @click="modalStartupParams?.showModal()"
-          >
-            <SettingsIcon width="24" height="24"></SettingsIcon>
-          </button>
-        </div>
+        <run-client-button-group />
         <div class="flex gap-2">
           <button class="btn btn-ghost" v-html="DiscordIcon"></button>
           <button class="btn btn-ghost" v-html="GithubIcon"></button>
         </div>
       </div>
     </footer>
-
-    <dialog ref="modal_startup_params" class="modal">
-      <div class="modal-box">
-        <h3 class="text-lg font-bold">Startup Params</h3>
-        <p class="py-4">Settings for startup.</p>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
   </div>
 </template>

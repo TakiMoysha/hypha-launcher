@@ -6,6 +6,8 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { createRouter, createWebHashHistory } from "vue-router";
 
+import * as Sentry from "@sentry/vue";
+
 const pinia = createPinia();
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -48,7 +50,7 @@ const router = createRouter({
 		{
 			name: "dev:inspect",
 			path: "/dev/inspect",
-			component: import("./pages/WorkInProgress.vue")
+			component: import("./pages/WorkInProgress.vue"),
 		},
 		// debug (not for production)
 		{
@@ -59,4 +61,16 @@ const router = createRouter({
 	],
 });
 
-createApp(App).use(pinia).use(router).mount("#app");
+const app = createApp(App);
+
+Sentry.init({
+	app,
+	dsn: "https://908ba8b3b89918214bc7bef03819f077@o4511135509708800.ingest.de.sentry.io/4511135533170768",
+	integrations: [
+		Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
+	],
+	sendDefaultPii: true,
+	enableLogs: true,
+});
+
+app.use(pinia).use(router).mount("#app");

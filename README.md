@@ -1,6 +1,6 @@
 # Hypha Launcher
 
-Work in Progress
+Это небольшой лаунчер ориентированный на работу с модами для hytale.
 
 > https://en.wikipedia.org/wiki/Hypha
 

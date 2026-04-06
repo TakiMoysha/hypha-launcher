@@ -19,7 +19,7 @@ pub mod spawner {
     }
 
     #[tauri::command]
-    fn spawn_hytale_serve(
+    pub fn spawn_hytale_server(
         process: String,
         args: Vec<String>,
         log_callback: tauri::State<'_, LogCollector>,
@@ -41,7 +41,7 @@ pub mod spawner {
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-fn greet(name: &str) -> String {
+fn greeting_format(name: &str) -> String {
     format!(
         "Hello, {}! You've been greeted from Rust! Result: {}",
         name,
@@ -82,7 +82,7 @@ pub fn run() {
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![spawner::spawn_hytale_server])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
