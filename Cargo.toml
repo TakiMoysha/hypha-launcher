@@ -1,27 +1,24 @@
 [workspace]
 resolver = "3"
 members = [
-  "crates/frontend",
   "crates/backend",
+  "crates/frontend",
   # "crates/modules" # пока не реализовано
 ]
 
 [workspace.package]
-name = "hypha"
-description = "Hytale launcher oriented on modding."
 version = "0.1.0"
 edition = "2024"
+description = "Hytale launcher oriented on modding."
 license = "MIT"
 
-# [dependencies]
+[workspace.dependencies]
+hypha-backend = { path = "crates/backend" }
+
+[profile.dev.package."*"]
+opt-level = 3
 
 [profile.release]
 debug = "limited"
 lto = "thin"
 codegen-units = 1
-
-[profile.dev.package."*"]
-opt-level = 3
-
-[workspace.dependencies]
-hypha-backend = { path = "crates/backend" }

@@ -11,3 +11,9 @@
 #### Running Timer
 
 Зависит от "супервизора" процесса (server/client). Добавлять ли launcher extender - overlay для игры с параметрами отладки.
+
+## TASKS
+
+- [ ] added mock server for plugins (testing, tracers bullets, etc.)
+
+
