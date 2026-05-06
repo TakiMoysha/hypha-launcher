@@ -1,5 +1,3 @@
-pub mod domain;
-pub mod platform;
 pub mod modules;
 
 pub fn add(left: u64, right: u64) -> u64 {
