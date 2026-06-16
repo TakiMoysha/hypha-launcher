@@ -75,4 +75,5 @@ hypha-launcher/
 - [Mod Organizer 2 / github.com](https://github.com/ModOrganizer2/modorganizer)
 - [Vortex Mod Manager / github.com](https://github.com/Nexus-Mods/Vortex/)
 - [Pandoralauncher / github.com](https://github.com/Moulberry/PandoraLauncher/)
+- [MCreator / mcreator.net](https://mcreator.net)
 - TLauncher
