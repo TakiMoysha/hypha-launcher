@@ -87,7 +87,7 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-use hypha_backend::modules::game_search::{PlatformGameSearch, DiscoveredGame};
+use hypha_backend::modules::game_search::{DiscoveredGame};
 
 #[tauri::command]
 pub fn search_games() -> Vec<DiscoveredGame> {

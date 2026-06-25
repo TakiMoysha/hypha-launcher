@@ -70,6 +70,10 @@ hypha-launcher/
 └── vite.config.ts
 ```
 
+## TODO
+
+Hypha-Server - Rust-based server for hytale.
+
 ## Resources
 
 - [Mod Organizer 2 / github.com](https://github.com/ModOrganizer2/modorganizer)

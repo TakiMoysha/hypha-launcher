@@ -4,6 +4,8 @@
 
 ## Features
 
+- [ProcessKit for controll spawn process](https://zelanton.github.io/processkit/)
+
 #### Launcher Extender
 
 Либа, которая инжектится в игру при старте и добавляет overlay, где можно посмотрть моды и информацию по ним. Отображает логи запущенного сервера или инфу из лаунчера (общение с лаунчером через сокет).
