@@ -59,7 +59,7 @@ hypha-launcher/
 │   ├── tauri.svg
 │   └── vite.svg
 ├── README.md
-├── src
+├── src [FSD?]
 │   ├── App.vue
 │   ├── assets
 │   │   └── vue.svg
