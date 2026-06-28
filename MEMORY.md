@@ -70,12 +70,12 @@ src/
     └── not-found/
 ```
 Ключевые изменения
-composables/useRustABI.ts	-> shared/api/tauri.ts
-composables/useSettingsStore.ts	-> features/settings/model/store.ts
-components/RunClientButtonGroup.vue	-> features/run-client/ui/
-layouts/ScreenLayout.vue	-> widgets/screen-layout/ui/
-components/ui/ModsTable.vue	-> entities/mod/ui/
-Роутинг в main.ts	-> app/providers/router.ts
+`composables/useRustABI.ts` -> `shared/api/tauri.ts`
+`composables/useSettingsStore.ts` -> `features/settings/model/store.ts`
+`components/RunClientButtonGroup.vue` -> `features/run-client/ui/`
+`layouts/ScreenLayout.vue` -> `widgets/screen-layout/ui/`
+`components/ui/ModsTable.vue` -> `entities/mod/ui/`
+`Роутинг в main.ts` -> `app/providers/router.ts`
 
 1. Storybook — оставить в src/stories/;
 2. Tauri API будет расширяться (все, что запрещено в tauri на фронте будет в API, как минимум FS);
