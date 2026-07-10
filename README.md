@@ -81,3 +81,5 @@ Hypha-Server - Rust-based server for hytale.
 - [Pandoralauncher / github.com](https://github.com/Moulberry/PandoraLauncher/)
 - [MCreator / mcreator.net](https://mcreator.net)
 - TLauncher
+- [Simple containers runtime - bonkers / github](https://github.com/owlpharoah/b0nkers/blob/main/src/main.rs)
+- [Algorithm logs templating - logdraing / thekeeper.io](https://thekeeper.io/blog/logdrain-log-template-mining-in-rust/)
