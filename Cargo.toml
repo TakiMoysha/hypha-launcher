@@ -3,6 +3,7 @@ resolver = "3"
 members = [
   "crates/backend",
   "crates/frontend",
+  "crates/hypha-runner",
   # "crates/modules" # пока не реализовано
 ]
 

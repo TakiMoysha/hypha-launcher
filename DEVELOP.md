@@ -21,3 +21,10 @@
 
 - [ ] added mock server for plugins (testing, tracers bullets, etc.)
 
+# Hypha Runner
+
+Запускает сервак и управляет им:
+- docker/podman
+- process
+
+- [просмотрщик логов / dlt-tui](https://github.com/tkmsikd/dlt-tui)
