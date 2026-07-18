@@ -12,3 +12,6 @@ ratatui = "0.30.2"
 logdrain = "0.3.2"
 thiserror = "2.0.18"
 anyhow = "1.0.103"
+nix = { version = "0.31", features = ["user", "hostname", "signal"] }
+[target.'cfg(target_os = "linux")'.dependencies]
+nix = { version = "0.31", features = ["mount", "sched", "fs"] }  # под твои syscalls
