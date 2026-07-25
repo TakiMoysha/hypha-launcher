@@ -2,17 +2,13 @@ use std::env::{home_dir, var};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use anyhow::bail;
 use nix::unistd::getcwd;
 use thiserror;
-
-pub const GAME_POSTFIX: &str = "Hytale/install/release/package/game/latest/";
 
 #[derive(Debug, thiserror::Error)]
 pub enum RunnerConfigErrors {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-
     #[error("WIP Error: {message}")]
     WorkInProgress {
         message: String,
@@ -23,33 +19,67 @@ pub enum RunnerConfigErrors {
 #[derive(Debug)]
 pub struct RunnerConfig {
     hytale_dir: PathBuf,
+    state_dir: PathBuf,
+
     default_opts: Vec<String>,
 }
 
-/// Linux: /Hytale/ (or /opt/hytale for custom server installs)
-/// macOS: ~/Library/Application Support/Hytale/
+impl RunnerConfig {
+    pub fn get_state_dir(&self) -> &PathBuf {
+        &self.state_dir
+    }
+
+    pub fn version_dir(&self, version: &str) -> Option<PathBuf> {
+        match version {
+            "latest" => Some(self.hytale_dir.join("install/release/package/game/latest/")),
+            _ => None,
+        }
+    }
+}
+
+/// Linux (flatpak): .var/app.com.hypixel.HytaleLauncher/data/Hytale/ (or /opt/hytale for custom server installs)
+/// macOS: Library/Application Support/Hytale/
 /// Windows: %appdata%\Hytale\
 fn default_root_game_dir() -> anyhow::Result<PathBuf> {
-    let candidates = vec![
-        #[cfg(target_os = "windows")]
-        PathBuf::from("%appdata%\\Hytale\\"), // TODO: fix this
-        #[cfg(target_os = "macos")]
-        PathBuf::from("/Library/Application Support/Hytale/"),
-        #[cfg(target_os = "linux")]
-        home_dir()
-            .expect("Failed to get home directory")
-            .join(".var/app/com.hypixel.HytaleLauncher/data/Hytale/"),
-        #[cfg(target_os = "linux")]
-        PathBuf::from("/opt/hytale/"),
-    ]
-    .into_iter()
-    .filter(|dir| dir.is_dir())
-    .collect::<Vec<PathBuf>>();
+    let mut candidates = Vec::new();
+    if cfg!(target_os = "linux") {
+        candidates.push(PathBuf::from("/opt/hytale/"));
+        candidates.push(
+            home_dir()
+                .expect("Failed to get home directory")
+                .join(".var/app/com.hypixel.HytaleLauncher/data/Hytale/"),
+        );
+    }
+    if cfg!(target_os = "windows") {
+        candidates.push(PathBuf::from("%appdata%\\Hytale\\")); // TODO: fix
+    }
+    if cfg!(target_os = "macos") {
+        candidates.push(PathBuf::from("Library/Application Support/Hytale/"));
+    }
 
-    if candidates.first().is_some() {
-        Ok(candidates.first().unwrap().to_owned())
+    candidates
+        .into_iter()
+        .find(|d| d.is_dir())
+        .ok_or_else(|| anyhow::anyhow!("Failed to find default game directory"))
+}
+
+/// TODO: addded macos & windows support
+fn default_state_dir() -> PathBuf {
+    let home_dir = home_dir().expect("Failed to get home directory");
+    let xdg_state_home = var("XDG_STATE_HOME")
+        .map(PathBuf::from)
+        .unwrap_or(PathBuf::from(home_dir.join(".local/state")))
+        .join("hypha-runner");
+
+    let candidates = vec![
+        #[cfg(target_os = "linux")]
+        xdg_state_home,
+    ];
+
+    if let Some(dir) = candidates.iter().find(|d| d.is_dir()) {
+        return dir.to_owned();
     } else {
-        bail!("Failed to find default game directory")
+        PathBuf::from(getcwd().expect("Failed to get working directory")).join("hypha-state")
     }
 }
 
@@ -64,22 +94,24 @@ impl Default for RunnerConfig {
 
             return RunnerConfig {
                 hytale_dir: dir,
+                state_dir: default_state_dir(),
                 default_opts: vec![],
             };
         }
 
         Self {
             hytale_dir: default_root_game_dir().expect("Failed to get game dir"),
+            state_dir: default_state_dir(),
             default_opts: vec![],
         }
     }
 }
 
 impl FromStr for RunnerConfig {
-    type Err = std::io::Error;
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let config = s.split('\n').fold(Self::default(), {
+        let config = s.lines().fold(Self::default(), {
             |mut acc, line| {
                 if let Some((key, value)) = line.split_once('=') {
                     match key {
@@ -95,35 +127,35 @@ impl FromStr for RunnerConfig {
     }
 }
 
-/// helper, loaded config file, default config, args from cli and merge them
-/// TODO: add config dir with xdg or getcwd
+/// this helper load config from cwd_file -> xdg_file or default file
 #[tracing::instrument]
 pub(crate) fn load_config() -> anyhow::Result<RunnerConfig, RunnerConfigErrors> {
-    let cwd_config_file_path = getcwd()
-        .map_err(|err| RunnerConfigErrors::WorkInProgress {
-            message: err.to_string(),
-            span_trace: tracing_error::SpanTrace::capture(),
-        })?
-        .join("hypha-runner.toml");
-
-    if cwd_config_file_path.is_file() {
-        let config_content = &std::fs::read_to_string(cwd_config_file_path)?;
-
-        return Ok(RunnerConfig::from_str(config_content)?);
+    fn try_load_from_file(path: &PathBuf) -> Option<RunnerConfig> {
+        if !path.is_file() {
+            return None;
+        }
+        let config_content = &std::fs::read_to_string(path).ok()?;
+        RunnerConfig::from_str(&config_content).ok()
     }
 
-    let raw_xdg_config_file_path =
-        var("XDG_CONFIG_HOME").map_err(|err| RunnerConfigErrors::WorkInProgress {
-            message: err.to_string(),
-            span_trace: tracing_error::SpanTrace::capture(),
-        })?;
-    let xdg_config_file_path =
-        PathBuf::from(raw_xdg_config_file_path).join("hypha-runner/hypha-runner.toml");
+    let cwd_config_file_path = getcwd().map_err(|err| RunnerConfigErrors::WorkInProgress {
+        message: err.to_string(),
+        span_trace: tracing_error::SpanTrace::capture(),
+    })?;
 
-    if xdg_config_file_path.is_file() {
-        let config_content = &std::fs::read_to_string(xdg_config_file_path)?;
+    if let Some(config) = try_load_from_file(&cwd_config_file_path.join("hypha-runner.toml")) {
+        return Ok(config);
+    }
 
-        return Ok(RunnerConfig::from_str(config_content)?);
+    let xdg_config_file_path = var("XDG_CONFIG_HOME")
+        .ok()
+        .map(|p| PathBuf::from(p).join("hypha-runner/hypha-runner.toml"))
+        .filter(|p| p.is_file());
+
+    if let Some(xdg_config_file) = xdg_config_file_path {
+        if let Some(config) = try_load_from_file(&xdg_config_file) {
+            return Ok(config);
+        }
     }
 
     Ok(RunnerConfig::default())
@@ -131,7 +163,6 @@ pub(crate) fn load_config() -> anyhow::Result<RunnerConfig, RunnerConfigErrors> 
 
 #[cfg(test)]
 mod test {
-
     use super::*;
 
     #[test]
@@ -142,7 +173,9 @@ mod test {
 
     #[test]
     fn should_pase_config_from_string() {
-        let config = RunnerConfig::from_str("HYTALE_DIR=/tmp/hytale");
+        let test_config = "\n[default]\r\nsometrash\nother_value = true\nHYTALE_DIR=/tmp/hytale";
+        let config = RunnerConfig::from_str(test_config);
         assert!(config.is_ok(), "Failed to parse config");
+        assert_eq!(config.unwrap().hytale_dir, PathBuf::from("/tmp/hytale"));
     }
 }
