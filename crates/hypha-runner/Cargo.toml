@@ -6,12 +6,18 @@ description.workspace = true
 license.workspace = true
 
 [dependencies]
+anyhow = "1.0.103"
 clap = { version = "4.3.0", features = ["derive"] }
 crossterm = "0.29.0"
-ratatui = "0.30.2"
 logdrain = "0.3.2"
+nix = { version = "0.31", features = ["hostname", "signal", "user"] }
+ratatui = "0.30.2"
 thiserror = "2.0.18"
-anyhow = "1.0.103"
-nix = { version = "0.31", features = ["user", "hostname", "signal"] }
+tokio = { version = "1.32.0", features = ["full"] }
+
+tracing = "0.1"
+tracing-error = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
 [target.'cfg(target_os = "linux")'.dependencies]
-nix = { version = "0.31", features = ["mount", "sched", "fs"] }  # под твои syscalls
+nix = { version = "0.31", features = ["fs", "mount", "sched"] }  # под syscalls

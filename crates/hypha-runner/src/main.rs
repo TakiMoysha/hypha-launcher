@@ -1,52 +1,110 @@
-use std::str::FromStr;
+use std::{path::PathBuf, str::FromStr};
+
+use nix::unistd::getcwd;
+use tracing::{Level, error, event, info, warn};
 
 use clap::{Command, arg};
 
+use crate::runtimes::JarRuntime;
+
 use self::runtimes::Runtimes;
 
-fn main() {
+mod config;
+
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let args = Command::new("hypha-runner")
         .version("0.1.0")
         .arg_required_else_help(true)
         .subcommand_required(true)
         .subcommand(
             Command::new("run")
-                .about("Run a world")
+                .about("Supervisor for start and management hytale worlds (servers).")
                 .arg_required_else_help(true)
-                .arg(arg!([WORLD] "World name to run"))
+                .arg(arg!(<WORLD> "World name to run").required(true))
                 .arg(
                     arg!(--runtime <RUNTIME> "Runtime to use (container, nixbox)")
-                        .value_parser(|s: &str| Runtimes::from_str(s).map_err(|e| e.to_string()))
-                        .default_value("nixbox"),
-                ),
+                        .value_parser(|s: &str| s.parse::<runtimes::Runtimes>())
+                        .default_value("container"),
+                )
+                .arg(arg!([OPTS] ..."Additional options to pass to the runtime (cgroups, mount, etc.) (WIP)")),
         )
-        .subcommand(Command::new("list").about("List existing worlds (WIP)"))
+        .subcommand(
+            Command::new("list")
+                .alias("ls")
+                .about("List existing worlds (WIP)"),
+        )
         .get_matches();
 
-    let _ = sanitize_pervious_run();
+    event!(Level::DEBUG, "Starting hypha-runner: {args:#?}");
 
-    start_server();
+    let config = config::load_config();
+
+    event!(Level::DEBUG, "Loaded config: {config:#?}");
+
+    let _ = ending_sanitize();
+
+    match &args.subcommand() {
+        Some(("run", args)) => {
+            let world = args
+                .get_one::<String>("WORLD")
+                .expect("World name is required");
+            let runtime = args
+                .get_one::<Runtimes>("runtime")
+                .expect("[Unexpected Error] Undefined runtime");
+
+            let runtime = runtime.run(&world).expect("Failed to run the runtime");
+        }
+        Some(("list", _)) => {
+            let wrk_dir = getcwd().expect("Failed to get working directory");
+        }
+        _ => unreachable!(),
+    }
+
+    Ok(())
 }
 
-/// check if the server is already running or artifacts from previous run exists
-fn sanitize_pervious_run() -> anyhow::Result<()> {
-    todo!()
+/// check if the server is already running or exists artifacts from previous run
+fn ending_sanitize() -> anyhow::Result<()> {
+    warn!("[WIP] check if the server is already running or artifacts from previous run exists");
+    Ok(())
 }
 
-fn start_server() {}
+fn init_state() -> anyhow::Result<()> {
+    warn!("[WIP] initialize directories and files");
+    let wrk_dir =
+        PathBuf::from(getcwd().expect("Failed to get working directory")).join("hypha-workdir");
+
+    if !wrk_dir.exists() {
+        std::fs::create_dir_all(&wrk_dir).expect("Failed to create working directory");
+    }
+
+    Ok(())
+}
 
 mod runtimes {
     use std::str::FromStr;
 
     use container_runtime::ContainerRuntime;
+
     #[cfg(target_os = "linux")]
     use nixbox_runtime::NixboxRuntime;
 
     use anyhow::anyhow;
-
     pub trait JarRuntime {
         fn run(&self, world: &str) -> anyhow::Result<()>;
+        fn clean(&self, world: &str) -> anyhow::Result<()>;
     }
+
+    // ==========================================================================================
+    pub fn gen_cgroup_name(name: &str) -> String {
+        format!("hypha-cgroup-{name}")
+    }
+    // ==========================================================================================
 
     #[derive(Clone)]
     pub enum Runtimes {
@@ -61,6 +119,14 @@ mod runtimes {
                 Runtimes::Container(runtime) => runtime.run(world),
                 #[cfg(target_os = "linux")]
                 Runtimes::Nixbox(runtime) => runtime.run(world),
+            }
+        }
+
+        fn clean(&self, world: &str) -> anyhow::Result<()> {
+            match self {
+                Runtimes::Container(runtime) => runtime.clean(world),
+                #[cfg(target_os = "linux")]
+                Runtimes::Nixbox(runtime) => runtime.clean(world),
             }
         }
     }
@@ -88,6 +154,10 @@ mod runtimes {
             fn run(&self, world: &str) -> anyhow::Result<()> {
                 todo!()
             }
+
+            fn clean(&self, world: &str) -> anyhow::Result<()> {
+                todo!()
+            }
         }
     }
 
@@ -98,14 +168,12 @@ mod runtimes {
 
         use nix::{
             mount::{MsFlags, mount},
-            sys::{
-                stat::{Mode, SFlag, mknod},
-                wait::waitpid,
-            },
+            sys::stat::{Mode, SFlag, mknod},
+            sys::wait::waitpid,
             unistd::{Gid, Uid},
         };
 
-        use super::JarRuntime;
+        use super::{JarRuntime, gen_cgroup_name};
 
         #[derive(thiserror::Error, Debug)]
         pub enum NixboxRuntimeErrors {
@@ -128,6 +196,7 @@ mod runtimes {
             id: String,
             // child pid, not supervisor
             pid: Option<nix::unistd::Pid>,
+            container_dir: Option<PathBuf>,
             cgroup_path: Option<PathBuf>,
             cgroup_limits: CgroupLimitsOpts,
         }
@@ -135,9 +204,12 @@ mod runtimes {
         impl Default for NixboxRuntime {
             fn default() -> Self {
                 Self {
-                    id: "hypha-runner-default".to_string(),
+                    id: "default".to_string(),
                     pid: None,
-                    cgroup_path: None,
+                    container_dir: Some(PathBuf::from("")),
+                    cgroup_path: Some(
+                        PathBuf::from("/sys/fs/cgroup").join(gen_cgroup_name(&"default")),
+                    ),
                     cgroup_limits: CgroupLimitsOpts {
                         max_memory: 2048,
                         max_pids: 1024,
@@ -148,7 +220,7 @@ mod runtimes {
 
         impl NixboxRuntime {
             pub fn set_host_name(&self) -> nix::Result<()> {
-                nix::unistd::sethostname("nixbox-runtime")
+                nix::unistd::sethostname("hypha-nixbox")
             }
 
             /// /proc - system info
@@ -207,10 +279,28 @@ mod runtimes {
                     urandom,
                 )?;
 
+                // `/dev/zero` - zero-generator (https://man7.org/linux/man-pages/man7/random.7.html)
+                let zero = nix::sys::stat::makedev(1, 5);
+                mknod(
+                    CString::new("/dev/zero").unwrap().as_c_str(),
+                    SFlag::S_IFCHR,
+                    Mode::from_bits_truncate(0o666),
+                    zero,
+                )?;
+
                 Ok(())
             }
 
             pub fn setup_fs(&self) -> Result<(), NixboxRuntimeErrors> {
+                mount(
+                    None::<&str>,
+                    "/",
+                    None::<&str>,
+                    MsFlags::MS_REC | MsFlags::MS_PRIVATE,
+                    None::<&str>,
+                )
+                .unwrap();
+
                 self.mount_proc()?;
                 self.mount_dev()?;
                 self.set_host_name()?;
@@ -224,7 +314,7 @@ mod runtimes {
 
             pub fn setup_cgroups(&self) -> Result<(), NixboxRuntimeErrors> {
                 let id = &self.id;
-                let cgroup = PathBuf::from("/sys/fs/cgroup").join(format!("hypha-{id}"));
+                let cgroup = PathBuf::from("/sys/fs/cgroup").join(gen_cgroup_name(id));
                 fs::create_dir_all(&cgroup)?;
 
                 fs::write(
@@ -245,6 +335,12 @@ mod runtimes {
 
             // TODO:
             // - unshare so that the process runs in its own namespace (https://man7.org/linux/man-pages/man1/unshare.1.html)
+            //unshare(
+            //     CloneFlags::CLONE_NEWNS   | //
+            //     CloneFlags::CLONE_NEWPID  | //
+            //     CloneFlags::CLONE_NEWNET  | //
+            //     CloneFlags::CLONE_NEWIPC    // запрет IPC (https://man7.org/linux/man-pages/man2/clone.2.html)
+            // )?;
             // pub fn spawn_supervisor(&self) -> Result<()> {}
         }
 
@@ -268,13 +364,9 @@ mod runtimes {
 
                 // cleanup cgroup file
                 if let Some(path) = &self.cgroup_path {
-                    if path.exists() {
-                        if let Err(e) = fs::remove_dir(path) {
-                            eprintln!("[ERROR] Can't find cgroups path to delete: {}", e);
-                        } else {
-                            println!("[INFO] cgroups deleted");
-                        }
-                    }
+                    path.exists().then(|| {
+                        fs::remove_dir(path).expect("[ERROR] Failed to remove cgroup dir");
+                    });
                 };
 
                 // cleanup temporary server files (upper layer - ?)
@@ -285,11 +377,29 @@ mod runtimes {
                 // }
 
                 // merged dir only mount point, linux kernel will unmount it
+                if let Some(path) = &self.cgroup_path {
+                    path.exists().then(|| {
+                        fs::remove_dir_all(path).expect("[ERROR] Failed to remove cgroup dir")
+                    });
+                }
+
+                if let Some(path) = &self.container_dir {
+                    path.exists().then(|| {
+                        fs::remove_dir_all(path).expect("[ERROR] Failed to remove container dir")
+                    });
+                }
             }
         }
 
         impl JarRuntime for NixboxRuntime {
             fn run(&self, world: &str) -> anyhow::Result<()> {
+                let mut server_process = tokio::process::Command::new("java");
+
+                Ok(())
+            }
+
+            fn clean(&self, world: &str) -> anyhow::Result<()> {
+                // see drop trait
                 todo!()
             }
         }
