@@ -15,6 +15,7 @@ pub trait JarRuntime {
 pub fn gen_cgroup_name(name: &str) -> String {
     format!("hypha-cgroup-{name}")
 }
+
 // ==========================================================================================
 
 #[derive(Clone)]

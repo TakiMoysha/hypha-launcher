@@ -2,6 +2,8 @@ use std::env::{home_dir, var};
 use std::path::PathBuf;
 use std::str::FromStr;
 
+use tracing::debug;
+
 use nix::unistd::getcwd;
 use thiserror;
 
@@ -18,18 +20,36 @@ pub enum RunnerConfigErrors {
 
 #[derive(Debug)]
 pub struct RunnerConfig {
-    hytale_dir: PathBuf,
-    state_dir: PathBuf,
+    pub hytale_dir: PathBuf,
+    pub state_dir: PathBuf,
 
-    default_opts: Vec<String>,
+    pub default_opts: Vec<String>,
 }
 
 impl RunnerConfig {
-    pub fn get_state_dir(&self) -> &PathBuf {
-        &self.state_dir
+    pub fn get_universes_dir_path(&self) -> PathBuf {
+        self.state_dir.join("universes")
     }
 
-    pub fn version_dir(&self, version: &str) -> Option<PathBuf> {
+    pub fn server_jar_path(&self, version: &str) -> Option<PathBuf> {
+        match version {
+            "latest" => Some(
+                self.hytale_dir
+                    .join("install/release/package/game/latest/Server/HytaleServer.jar"),
+            ),
+            _ => None,
+        }
+    }
+    pub fn assets_zip_path(&self, version: &str) -> Option<PathBuf> {
+        match version {
+            "latest" => Some(
+                self.hytale_dir
+                    .join("install/release/package/game/latest/Assets.zip"),
+            ),
+            _ => None,
+        }
+    }
+    pub fn latest_ver_path(&self, version: &str) -> Option<PathBuf> {
         match version {
             "latest" => Some(self.hytale_dir.join("install/release/package/game/latest/")),
             _ => None,
@@ -79,12 +99,18 @@ fn default_state_dir() -> PathBuf {
     if let Some(dir) = candidates.iter().find(|d| d.is_dir()) {
         return dir.to_owned();
     } else {
-        PathBuf::from(getcwd().expect("Failed to get working directory")).join("hypha-state")
+        PathBuf::from(getcwd().expect("Failed to get working directory")).join("hypha-workdir")
     }
 }
 
 impl Default for RunnerConfig {
     fn default() -> Self {
+        let default_opts: Vec<String> = vec![
+            "-XX:+UseCompactObjectHeaders".to_string(),
+            "-XX:ShenandoahGCMode=generational".to_string(),
+            "--disable-sentry".to_string(),
+        ];
+
         #[cfg(debug_assertions)]
         if let Ok(p) = var("DEV__HYTALE_DIR") {
             let dir = PathBuf::from(p);
@@ -95,14 +121,14 @@ impl Default for RunnerConfig {
             return RunnerConfig {
                 hytale_dir: dir,
                 state_dir: default_state_dir(),
-                default_opts: vec![],
+                default_opts,
             };
         }
 
         Self {
             hytale_dir: default_root_game_dir().expect("Failed to get game dir"),
             state_dir: default_state_dir(),
-            default_opts: vec![],
+            default_opts,
         }
     }
 }
@@ -135,6 +161,7 @@ pub(crate) fn load_config() -> anyhow::Result<RunnerConfig, RunnerConfigErrors> 
             return None;
         }
         let config_content = &std::fs::read_to_string(path).ok()?;
+        debug!("Loaded config from {}", path.display());
         RunnerConfig::from_str(&config_content).ok()
     }
 

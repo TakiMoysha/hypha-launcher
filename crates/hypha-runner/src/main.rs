@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 use nix::unistd::getcwd;
-use tracing::{Level, event, warn};
+use tracing::{Level, debug, debug_span, info, warn};
 
 use clap::{Command, arg};
 
@@ -28,20 +30,23 @@ async fn main() -> anyhow::Result<()> {
                         .value_parser(|s: &str| s.parse::<Runtimes>())
                         .default_value("container"),
                 )
-                .arg(arg!([OPTS] ..."Additional options to pass to the runtime (cgroups, mount, etc.) (WIP)")),
+                .arg(arg!([ASSETS_PATH] "(WIP) Custom path to assets path or use default from server version."))
+                .arg(arg!([OPTS] ..."(WIP) Additional options to pass to the runtime (cgroups, mount, etc.) ")),
         )
         .subcommand(
             Command::new("list")
                 .alias("ls")
                 .about("List existing universes (WIP)"),
         )
+        .subcommand(
+            Command::new("config")
+                .about("Print configuration file (WIP)"),
+        )
         .get_matches();
 
-    event!(Level::DEBUG, "Starting hypha-runner: {args:#?}");
+    debug!("Starting hypha-runner in directory: {args:?}");
 
     let config = config::load_config().expect("Can't load config");
-
-    event!(Level::DEBUG, "Loaded config: {config:#?}");
 
     /// check if the server is already running or exists artifacts from previous run
     // let _ = ending_sanitize();
@@ -49,21 +54,35 @@ async fn main() -> anyhow::Result<()> {
 
     match &args.subcommand() {
         Some(("run", args)) => {
-            let universes_dir = args
+            let universe_name = args
                 .get_one::<String>("UNIVERSE")
                 .expect("Universe name is required");
             let runtime = args
                 .get_one::<Runtimes>("runtime")
                 .expect("[Unexpected Error] Undefined runtime");
 
-            // let runtime = runtime.run(&universe_dir).expect("Failed to run the runtime");
+            // let runtime = runtime
+            //     .run(&universe_dir)
+            //     .expect("Failed to run the runtime");
 
             // let _ = ending_sanitize();
         }
         Some(("list", _)) => {
-            let universes_dir = config.get_state_dir().join("universes");
+            let universes_dir = config.get_universes_dir_path();
+            let universes = get_list_universes(&universes_dir);
 
-            println!("universes: {universes_dir:#?}");
+            if universes.is_empty() {
+                println!("No universes found");
+                return Ok(());
+            } else {
+                println!("Existing universes:");
+                for (name, path) in universes {
+                    println!("\t{name}: {path:?}");
+                }
+            }
+        }
+        Some(("config", _)) => {
+            println!("{config:#?}");
         }
         _ => unreachable!(),
     }
@@ -71,13 +90,34 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+fn get_list_universes(universes_dir: &std::path::Path) -> HashMap<String, std::path::PathBuf> {
+    let mut universes = HashMap::new();
+
+    debug!("Reading universes dir: {universes_dir:?}");
+    match std::fs::read_dir(&universes_dir) {
+        Ok(entries) => {
+            for entry in entries.flatten() {
+                debug!("Entry: {entry:?}");
+                if entry.file_type().is_ok_and(|t| t.is_dir()) {
+                    universes.insert(
+                        entry.file_name().to_string_lossy().to_string(),
+                        entry.path(),
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            warn!("Could not read universes dir: {e}");
+        }
+    }
+
+    universes
+}
+
 fn init_state(config: &config::RunnerConfig) -> anyhow::Result<()> {
-    warn!("[WIP] initialize directories and files");
-
-    let state_dir = config.get_state_dir();
-
-    if !state_dir.exists() {
-        std::fs::create_dir_all(&state_dir).expect("Failed to create working directory");
+    if !config.state_dir.exists() {
+        std::fs::create_dir_all(&config.state_dir).expect("Failed to create state directory");
+        info!("Created state directory <{}>", config.state_dir.display());
     }
 
     Ok(())
