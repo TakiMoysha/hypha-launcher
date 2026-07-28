@@ -30,3 +30,6 @@ tmp/
 storybook-static
 
 .env
+# artifacts
+hypha-workdir
+hypha-runner.toml
