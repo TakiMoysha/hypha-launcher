@@ -73,14 +73,14 @@ async fn main() -> anyhow::Result<()> {
             let _universe_name = args
                 .get_one::<String>("UNIVERSE")
                 .expect("Universe name is required");
-            let _runtime = args
+            let runtime = args
                 .get_one::<Runtimes>("runtime")
                 .expect("[Unexpected Error] Undefined runtime");
             let _assets_dir = args.get_one::<std::path::PathBuf>("assets").cloned();
 
-            let runtime = runtime
-                .run(&universe_dir)
-                .expect("Failed to run the runtime");
+            // let runtime = runtime
+            //     .run(&universe_dir)
+            //     .expect("Failed to run the runtime");
         }
 
         Some(("healthcheck", _)) => {

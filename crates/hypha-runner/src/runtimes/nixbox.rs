@@ -26,13 +26,13 @@ pub enum NixboxRuntimeErrors {
     Any(#[from] Box<dyn std::error::Error + Send + Sync>),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CgroupLimitsOpts {
     max_memory: u32,
     max_pids: u32,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NixboxRuntime {
     id: String,
     // child pid, not supervisor
