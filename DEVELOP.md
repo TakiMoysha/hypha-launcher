@@ -53,6 +53,10 @@
 ```
 
 
+##### Shell Suggestions
+
+Для работы `<Tab>` в терминал, в частности для universes. zsh/bash выполняет фоновый, скрытый вызов бинарника (`hypha-runner __complete_universes`) и отображает вывод.
+
 ##### Unprivileged Runner
 
 Запрещает вызов `mknod` (EPERM), создание символьных/блочных устройств ограничено 
@@ -61,4 +65,5 @@
 ## References
 
 - [просмотрщик логов / dlt-tui](https://github.com/tkmsikd/dlt-tui)
+- [Hytale Server Manual / hytale.com](https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual)
 

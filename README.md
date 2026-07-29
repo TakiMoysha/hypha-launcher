@@ -1,6 +1,6 @@
 # Hypha Launcher
 
-Это небольшой лаунчер ориентированный на работу с модами для hytale.
+Это лаунчер ориентированный на работу с модами для hytale.
 
 > https://en.wikipedia.org/wiki/Hypha
 
@@ -72,7 +72,9 @@ hypha-launcher/
 
 ## TODO
 
-Hypha-Server - Rust-based server for hytale.
+- [?] Hypha-Proxy - api gateway for hytale servers.
+
+- [-] hytale server on rust - плохая идея, очень большие трудозатраты и околонулевой смысл, т.к. моды либо не будут совместимы, либо нужно будет писать прослойка для портирования.
 
 ## Resources
 
