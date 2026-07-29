@@ -1,22 +1,18 @@
 use std::collections::HashMap;
 
-use nix::unistd::getcwd;
-use tracing::{Level, debug, debug_span, info, warn};
+use tracing::{debug, info, warn};
 
-use clap::{Command, arg};
+use clap::{Command, arg, value_parser};
 
 mod config;
 mod runtimes;
 
 use runtimes::Runtimes;
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-        .init();
+use clap_complete::aot::{Shell, generate};
 
-    let args = Command::new("hypha-runner")
+fn build_cli() -> Command {
+    Command::new("hypha-runner")
         .version("0.1.0")
         .arg_required_else_help(true)
         .subcommand_required(true)
@@ -24,48 +20,71 @@ async fn main() -> anyhow::Result<()> {
             Command::new("run")
                 .about("Supervisor for start and management hytale universe (servers).")
                 .arg_required_else_help(true)
-                .arg(arg!(<UNIVERSE> "UNIVERSE name to run").required(true))
+                .arg(arg!(<UNIVERSE> "Name of Universe (server) to run").required(true))
                 .arg(
-                    arg!(--runtime <RUNTIME> "Runtime to use (container, nixbox)")
+                    arg!(--runtime <RUNTIME> "One of: bare, container, nixbox.")
+                        .help("Container use docker/podman, nixbox is linux sandbox, bare - no container")
                         .value_parser(|s: &str| s.parse::<Runtimes>())
-                        .default_value("container"),
+                        .default_value("bare"),
                 )
-                .arg(arg!([ASSETS_PATH] "(WIP) Custom path to assets path or use default from server version."))
+                .arg(
+                    arg!(--assets [ASSETS_PATH] "(WIP) Custom path to assets path (archive or directory).")
+                        .value_hint(clap::ValueHint::AnyPath) // archive or directory
+                )
                 .arg(arg!([OPTS] ..."(WIP) Additional options to pass to the runtime (cgroups, mount, etc.) ")),
+        )
+        .subcommand(
+            Command::new("healthcheck")
+                .about("Validate universes, see backups, check required apps, etc")
         )
         .subcommand(
             Command::new("list")
                 .alias("ls")
-                .about("List existing universes (WIP)"),
+                .about("List existing universes"),
         )
         .subcommand(
             Command::new("config")
-                .about("Print configuration file (WIP)"),
+                .about("Print configuration file"),
         )
-        .get_matches();
+        .subcommand(
+            Command::new("completions")
+                .about("Generate shell completions")
+                .arg(arg!(<SHELL> "Shell to generate completions for").value_parser(value_parser!(Shell))))
+}
+
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
+    let args = build_cli().get_matches();
 
     debug!("Starting hypha-runner in directory: {args:?}");
 
-    let config = config::load_config().expect("Can't load config");
+    let config = config::load_config_with_autodiscovery().expect("Can't load config");
 
-    /// check if the server is already running or exists artifacts from previous run
+    // TODO: check if the server is already running or exists artifacts from previous run
     // let _ = ending_sanitize();
     let _ = init_state(&config);
 
     match &args.subcommand() {
         Some(("run", args)) => {
-            let universe_name = args
+            let _universe_name = args
                 .get_one::<String>("UNIVERSE")
                 .expect("Universe name is required");
-            let runtime = args
+            let _runtime = args
                 .get_one::<Runtimes>("runtime")
                 .expect("[Unexpected Error] Undefined runtime");
+            let _assets_dir = args.get_one::<std::path::PathBuf>("assets").cloned();
 
-            // let runtime = runtime
-            //     .run(&universe_dir)
-            //     .expect("Failed to run the runtime");
+            let runtime = runtime
+                .run(&universe_dir)
+                .expect("Failed to run the runtime");
+        }
 
-            // let _ = ending_sanitize();
+        Some(("healthcheck", _)) => {
+            todo!()
         }
         Some(("list", _)) => {
             let universes_dir = config.get_universes_dir_path();
@@ -83,6 +102,14 @@ async fn main() -> anyhow::Result<()> {
         }
         Some(("config", _)) => {
             println!("{config:#?}");
+        }
+        Some(("completions", sub_args)) => {
+            let shell = sub_args
+                .get_one::<Shell>("SHELL")
+                .copied()
+                .expect("Shell is required");
+            let mut cmd = build_cli();
+            generate(shell, &mut cmd, "hypha-runner", &mut std::io::stdout());
         }
         _ => unreachable!(),
     }

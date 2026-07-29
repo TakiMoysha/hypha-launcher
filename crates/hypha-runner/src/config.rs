@@ -1,3 +1,4 @@
+/// ?TODO: separate Runtime to sanbox and ProcessHandler
 use std::env::{home_dir, var};
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -20,6 +21,7 @@ pub enum RunnerConfigErrors {
 
 #[derive(Debug)]
 pub struct RunnerConfig {
+    pub config_path: Option<PathBuf>,
     pub hytale_dir: PathBuf,
     pub state_dir: PathBuf,
 
@@ -40,7 +42,7 @@ impl RunnerConfig {
             _ => None,
         }
     }
-    pub fn assets_zip_path(&self, version: &str) -> Option<PathBuf> {
+    pub fn assets_path(&self, version: &str) -> Option<PathBuf> {
         match version {
             "latest" => Some(
                 self.hytale_dir
@@ -54,6 +56,10 @@ impl RunnerConfig {
             "latest" => Some(self.hytale_dir.join("install/release/package/game/latest/")),
             _ => None,
         }
+    }
+
+    pub fn universe_config_path(&self, universe: &str) -> Option<PathBuf> {
+        Some(self.get_universes_dir_path().join("worlds/config.json"))
     }
 }
 
@@ -106,26 +112,30 @@ fn default_state_dir() -> PathBuf {
 impl Default for RunnerConfig {
     fn default() -> Self {
         let default_opts: Vec<String> = vec![
+            "-XX:AOTCache=HytaleServer.aot".to_string(), // AOT may be not optimal for development
             "-XX:+UseCompactObjectHeaders".to_string(),
             "-XX:ShenandoahGCMode=generational".to_string(),
             "--disable-sentry".to_string(),
         ];
 
-        #[cfg(debug_assertions)]
+        #[cfg(debug_assertions)] // only in build contain debug assetions (not production)
         if let Ok(p) = var("DEV__HYTALE_DIR") {
-            let dir = PathBuf::from(p);
-            if !dir.is_dir() {
-                panic!("DEV__HYTALE_DIR does not exist");
-            }
+            if let Ok(dev_hytale_dir) = std::fs::canonicalize(PathBuf::from(p)) {
+                if !dev_hytale_dir.is_dir() {
+                    panic!("Can't get absolute path from DEV__HYTALE_DIR");
+                }
 
-            return RunnerConfig {
-                hytale_dir: dir,
-                state_dir: default_state_dir(),
-                default_opts,
-            };
+                return RunnerConfig {
+                    config_path: None,
+                    hytale_dir: dev_hytale_dir,
+                    state_dir: default_state_dir(),
+                    default_opts,
+                };
+            }
         }
 
         Self {
+            config_path: None,
             hytale_dir: default_root_game_dir().expect("Failed to get game dir"),
             state_dir: default_state_dir(),
             default_opts,
@@ -155,14 +165,16 @@ impl FromStr for RunnerConfig {
 
 /// this helper load config from cwd_file -> xdg_file or default file
 #[tracing::instrument]
-pub(crate) fn load_config() -> anyhow::Result<RunnerConfig, RunnerConfigErrors> {
+pub(crate) fn load_config_with_autodiscovery() -> anyhow::Result<RunnerConfig, RunnerConfigErrors> {
     fn try_load_from_file(path: &PathBuf) -> Option<RunnerConfig> {
         if !path.is_file() {
             return None;
         }
         let config_content = &std::fs::read_to_string(path).ok()?;
         debug!("Loaded config from {}", path.display());
-        RunnerConfig::from_str(&config_content).ok()
+        let mut config = RunnerConfig::from_str(&config_content).ok()?;
+        config.config_path = Some(path.clone());
+        Some(config)
     }
 
     let cwd_config_file_path = getcwd().map_err(|err| RunnerConfigErrors::WorkInProgress {
