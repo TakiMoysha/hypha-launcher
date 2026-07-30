@@ -15,6 +15,7 @@ nix = { version = "0.31", features = ["hostname", "signal", "user"] }
 ratatui = "0.30.2"
 thiserror = "2.0.18"
 tokio = { version = "1.32.0", features = ["full"] }
+async-trait = "0.1.91"
 
 tracing = "0.1"
 tracing-error = "0.2"
