@@ -65,5 +65,6 @@
 ## References
 
 - [просмотрщик логов / dlt-tui](https://github.com/tkmsikd/dlt-tui)
+- [B0nkers / github.com](https://github.com/owlpharoah/b0nkers/blob/main/src/main.rs)
 - [Hytale Server Manual / hytale.com](https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual)
 

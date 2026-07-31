@@ -3,7 +3,7 @@ use std::env::{home_dir, var};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use tracing::debug;
+use tracing::{debug, warn};
 
 use nix::unistd::getcwd;
 use thiserror;
@@ -22,15 +22,16 @@ pub enum RunnerConfigErrors {
 #[derive(Debug)]
 pub struct RunnerConfig {
     pub config_path: Option<PathBuf>,
-    pub hytale_dir: PathBuf,
-    pub state_dir: PathBuf,
 
-    pub default_opts: Vec<String>,
+    pub hytale_dir: PathBuf,
+    pub work_dir: PathBuf,
+
+    pub default_jvm_opts: Vec<String>,
 }
 
 impl RunnerConfig {
     pub fn get_universes_dir_path(&self) -> PathBuf {
-        self.state_dir.join("universes")
+        self.work_dir.join("universes")
     }
 
     pub fn server_jar_path(&self, version: &str) -> Option<PathBuf> {
@@ -59,14 +60,18 @@ impl RunnerConfig {
     }
 
     pub fn universe_config_path(&self, universe: &str) -> Option<PathBuf> {
-        Some(self.get_universes_dir_path().join("worlds/config.json"))
+        Some(
+            self.get_universes_dir_path()
+                .join(universe)
+                .join("worlds/config.json"),
+        )
     }
 }
 
 /// Linux (flatpak): .var/app.com.hypixel.HytaleLauncher/data/Hytale/ (or /opt/hytale for custom server installs)
 /// macOS: Library/Application Support/Hytale/
 /// Windows: %appdata%\Hytale\
-fn default_root_game_dir() -> anyhow::Result<PathBuf> {
+fn default_root_game_dir() -> PathBuf {
     let mut candidates = Vec::new();
     if cfg!(target_os = "linux") {
         candidates.push(PathBuf::from("/opt/hytale/"));
@@ -77,9 +82,11 @@ fn default_root_game_dir() -> anyhow::Result<PathBuf> {
         );
     }
     if cfg!(target_os = "windows") {
+        warn!("Windows it not tested");
         candidates.push(PathBuf::from("%appdata%\\Hytale\\")); // TODO: fix
     }
     if cfg!(target_os = "macos") {
+        warn!("macOS it not tested");
         candidates.push(PathBuf::from("Library/Application Support/Hytale/"));
     }
 
@@ -87,6 +94,7 @@ fn default_root_game_dir() -> anyhow::Result<PathBuf> {
         .into_iter()
         .find(|d| d.is_dir())
         .ok_or_else(|| anyhow::anyhow!("Failed to find default game directory"))
+        .expect("Failed to find default game directory")
 }
 
 /// TODO: addded macos & windows support
@@ -118,27 +126,33 @@ impl Default for RunnerConfig {
             "--disable-sentry".to_string(),
         ];
 
-        #[cfg(debug_assertions)] // only in build contain debug assetions (not production)
-        if let Ok(p) = var("DEV__HYTALE_DIR") {
-            if let Ok(dev_hytale_dir) = std::fs::canonicalize(PathBuf::from(p)) {
-                if !dev_hytale_dir.is_dir() {
-                    panic!("Can't get absolute path from DEV__HYTALE_DIR");
-                }
+        #[cfg(debug_assertions)] // only if build contain debug assetions (not production)
+        {
+            let dev_hytale_dir = var("DEV__HYTALE_DIR")
+                .ok()
+                .and_then(|p| std::fs::canonicalize(PathBuf::from(p)).ok())
+                .filter(|p| p.is_dir())
+                .unwrap_or_else(default_root_game_dir);
 
-                return RunnerConfig {
-                    config_path: None,
-                    hytale_dir: dev_hytale_dir,
-                    state_dir: default_state_dir(),
-                    default_opts,
-                };
-            }
+            let dev_state_dir = var("DEV__STATE_DIR")
+                .ok()
+                .and_then(|p| std::fs::canonicalize(PathBuf::from(p)).ok())
+                .filter(|p| p.is_dir())
+                .unwrap_or_else(default_state_dir);
+
+            return RunnerConfig {
+                config_path: None,
+                hytale_dir: dev_hytale_dir,
+                work_dir: dev_state_dir,
+                default_jvm_opts: default_opts,
+            };
         }
 
         Self {
             config_path: None,
-            hytale_dir: default_root_game_dir().expect("Failed to get game dir"),
-            state_dir: default_state_dir(),
-            default_opts,
+            hytale_dir: default_root_game_dir(),
+            work_dir: default_state_dir(),
+            default_jvm_opts: default_opts,
         }
     }
 }
@@ -152,7 +166,7 @@ impl FromStr for RunnerConfig {
                 if let Some((key, value)) = line.split_once('=') {
                     match key {
                         "HYTALE_DIR" => acc.hytale_dir = PathBuf::from(value),
-                        _ => acc.default_opts.push(line.to_string()),
+                        _ => acc.default_jvm_opts.push(line.to_string()),
                     }
                 }
                 acc
@@ -206,8 +220,8 @@ mod test {
 
     #[test]
     fn should_return_root_path_by_planform() {
-        let root_game_dir = default_root_game_dir();
-        assert!(root_game_dir.is_ok(), "Failed to get root game dir");
+        /// panic if can't find default game dir
+        let _ = default_root_game_dir();
     }
 
     #[test]

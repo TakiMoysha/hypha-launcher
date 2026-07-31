@@ -70,7 +70,7 @@ async fn main() -> anyhow::Result<()> {
 
     match &args.subcommand() {
         Some(("run", args)) => {
-            let _universe_name = args
+            let universe_name = args
                 .get_one::<String>("UNIVERSE")
                 .expect("Universe name is required");
             let runtime = args
@@ -78,9 +78,10 @@ async fn main() -> anyhow::Result<()> {
                 .expect("[Unexpected Error] Undefined runtime");
             let _assets_dir = args.get_one::<std::path::PathBuf>("assets").cloned();
 
-            // let runtime = runtime
-            //     .run(&universe_dir)
-            //     .expect("Failed to run the runtime");
+            runtime
+                .run(universe_name, &config)
+                .await
+                .expect("Failed to run the runtime");
         }
 
         Some(("healthcheck", _)) => {
@@ -142,9 +143,9 @@ fn get_list_universes(universes_dir: &std::path::Path) -> HashMap<String, std::p
 }
 
 fn init_state(config: &config::RunnerConfig) -> anyhow::Result<()> {
-    if !config.state_dir.exists() {
-        std::fs::create_dir_all(&config.state_dir).expect("Failed to create state directory");
-        info!("Created state directory <{}>", config.state_dir.display());
+    if !config.work_dir.exists() {
+        std::fs::create_dir_all(&config.work_dir).expect("Failed to create state directory");
+        info!("Created state directory <{}>", config.work_dir.display());
     }
 
     Ok(())
