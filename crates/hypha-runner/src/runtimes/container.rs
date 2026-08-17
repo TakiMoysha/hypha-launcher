@@ -1,14 +1,16 @@
-use super::JarRuntime;
+use super::{JarArguments, JarRuntime};
+use async_trait::async_trait;
 
 #[derive(Debug, Clone)]
 pub struct ContainerRuntime;
 
+#[async_trait]
 impl JarRuntime for ContainerRuntime {
-    fn run(&self, world: &str) -> anyhow::Result<()> {
+    async fn run(&self, args: JarArguments) -> anyhow::Result<()> {
         todo!()
     }
 
-    fn clean(&self, world: &str) -> anyhow::Result<()> {
+    async fn clean(&self) -> anyhow::Result<()> {
         todo!()
     }
 }

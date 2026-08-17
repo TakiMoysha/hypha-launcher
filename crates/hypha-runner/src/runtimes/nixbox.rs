@@ -8,7 +8,8 @@ use nix::{
     sys::wait::waitpid,
 };
 
-use super::JarRuntime;
+use super::{JarArguments, JarRuntime};
+use async_trait::async_trait;
 
 // ==========================================================================================
 pub fn gen_cgroup_name(name: &str) -> String {
@@ -228,14 +229,16 @@ impl Drop for NixboxRuntime {
     }
 }
 
+#[async_trait]
 impl JarRuntime for NixboxRuntime {
-    fn run(&self, world: &str) -> anyhow::Result<()> {
+    async fn run(&self, args: JarArguments) -> anyhow::Result<()> {
         let mut server_process = tokio::process::Command::new("java");
 
+        todo!();
         Ok(())
     }
 
-    fn clean(&self, world: &str) -> anyhow::Result<()> {
+    async fn clean(&self) -> anyhow::Result<()> {
         // see drop trait
         todo!()
     }

@@ -14,7 +14,8 @@ use container::ContainerRuntime;
 use nixbox::NixboxRuntime;
 
 use anyhow::anyhow;
-// ==========================================================================================
+
+use crate::config::RunnerConfig;
 
 #[derive(Debug, Clone)]
 pub enum Runtimes {
@@ -34,14 +35,30 @@ impl Runtimes {
             Runtimes::Nixbox(runtime) => runtime,
         }
     }
-}
 
-impl JarRuntime for Runtimes {
-    fn run(&self, world: &str) -> anyhow::Result<()> {
-        self.inner().run(world)
+    #[tracing::instrument(name = "[runtimes:run]")]
+    pub async fn run(&self, universe: &str, config: &RunnerConfig) -> anyhow::Result<()> {
+        let latest_server_jar = config
+            .server_jar_path("latest")
+            .ok_or_else(|| anyhow!("Server jar path not found"))?;
+
+        let jvm_opts = config.default_jvm_opts.clone();
+        let server_opts = vec![];
+        let args = JarArguments::new(
+            universe,
+            Some(jvm_opts),
+            latest_server_jar,
+            Some(server_opts),
+            config.work_dir.clone(),
+        );
+
+        let _ = self.inner().run(args).await?;
+
+        Ok(())
     }
-    fn clean(&self, world: &str) -> anyhow::Result<()> {
-        self.inner().clean(world)
+
+    pub async fn clean(&self, universe: &str, config: &RunnerConfig) -> anyhow::Result<()> {
+        self.inner().clean().await
     }
 }
 

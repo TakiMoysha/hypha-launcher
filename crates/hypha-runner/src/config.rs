@@ -27,6 +27,7 @@ pub struct RunnerConfig {
     pub work_dir: PathBuf,
 
     pub default_jvm_opts: Vec<String>,
+    pub defualt_server_opts: Vec<String>,
 }
 
 impl RunnerConfig {
@@ -119,41 +120,32 @@ fn default_state_dir() -> PathBuf {
 
 impl Default for RunnerConfig {
     fn default() -> Self {
-        let default_opts: Vec<String> = vec![
+        let default_opts = vec![
             "-XX:AOTCache=HytaleServer.aot".to_string(), // AOT may be not optimal for development
             "-XX:+UseCompactObjectHeaders".to_string(),
             "-XX:ShenandoahGCMode=generational".to_string(),
-            "--disable-sentry".to_string(),
         ];
+        let default_server_opts = vec!["--disable-sentry".to_string()];
 
-        #[cfg(debug_assertions)] // only if build contain debug assetions (not production)
-        {
-            let dev_hytale_dir = var("DEV__HYTALE_DIR")
-                .ok()
-                .and_then(|p| std::fs::canonicalize(PathBuf::from(p)).ok())
-                .filter(|p| p.is_dir())
-                .unwrap_or_else(default_root_game_dir);
+        let dev_hytale_dir = var("DEV__HYTALE_DIR")
+            .ok()
+            .and_then(|p| std::fs::canonicalize(PathBuf::from(p)).ok())
+            .filter(|p| p.is_dir())
+            .unwrap_or_else(default_root_game_dir);
 
-            let dev_state_dir = var("DEV__STATE_DIR")
-                .ok()
-                .and_then(|p| std::fs::canonicalize(PathBuf::from(p)).ok())
-                .filter(|p| p.is_dir())
-                .unwrap_or_else(default_state_dir);
+        let dev_state_dir = var("DEV__STATE_DIR")
+            .ok()
+            .and_then(|p| std::fs::canonicalize(PathBuf::from(p)).ok())
+            .filter(|p| p.is_dir())
+            .unwrap_or_else(default_state_dir);
 
-            return RunnerConfig {
-                config_path: None,
-                hytale_dir: dev_hytale_dir,
-                work_dir: dev_state_dir,
-                default_jvm_opts: default_opts,
-            };
-        }
-
-        Self {
+        return RunnerConfig {
             config_path: None,
-            hytale_dir: default_root_game_dir(),
-            work_dir: default_state_dir(),
+            hytale_dir: dev_hytale_dir,
+            work_dir: dev_state_dir,
             default_jvm_opts: default_opts,
-        }
+            defualt_server_opts: default_server_opts,
+        };
     }
 }
 
@@ -166,6 +158,7 @@ impl FromStr for RunnerConfig {
                 if let Some((key, value)) = line.split_once('=') {
                     match key {
                         "HYTALE_DIR" => acc.hytale_dir = PathBuf::from(value),
+                        "STATE_DIR" => acc.work_dir = PathBuf::from(value),
                         _ => acc.default_jvm_opts.push(line.to_string()),
                     }
                 }

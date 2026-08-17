@@ -35,7 +35,7 @@ fn build_cli() -> Command {
         )
         .subcommand(
             Command::new("healthcheck")
-                .about("Validate universes, see backups, check required apps, etc")
+                .about("WIP: Validate universes, see backups, check required apps, etc")
         )
         .subcommand(
             Command::new("list")
@@ -55,6 +55,7 @@ fn build_cli() -> Command {
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
+        .compact()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
@@ -81,7 +82,7 @@ async fn main() -> anyhow::Result<()> {
             runtime
                 .run(universe_name, &config)
                 .await
-                .expect("Failed to run the runtime");
+                .expect("Something went wrong in runtime");
         }
 
         Some(("healthcheck", _)) => {
