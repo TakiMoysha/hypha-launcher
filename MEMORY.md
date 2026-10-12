@@ -29,6 +29,7 @@ src/
 └── stories/
     └── *.stories.ts
 ```
+
 Предлагаемая FSD-структура
 ```
 src/

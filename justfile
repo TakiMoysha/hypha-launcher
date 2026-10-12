@@ -1,4 +1,8 @@
 set dotenv-load
 
-check-runner *ARGS:
+# ex: just runner-dev
+runner-dev *ARGS:
+    cargo run --bin hypha-runner {{ ARGS }}
+
+runner-check *ARGS:
     cargo check --message-format=short --bin hypha-runner {{ ARGS }}

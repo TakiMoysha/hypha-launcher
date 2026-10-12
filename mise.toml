@@ -4,5 +4,5 @@ _.file = ".env"
 DEV__HYPIXEL_DIR = "{{env.DEV__HYPIXEL_DIR}}"
 # Hytale game data directory
 DEV__HYTALE_DIR = "{{env.DEV__HYTALE_DIR}}"
-# Hytale Creation Kit workspace
-DEV__CREATION_KIT_DIR = "{{env.DEV__CREATION_KIT_DIR}}"
+
+# Hytale Creation Kit / mod making dir -> переехали в opt

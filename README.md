@@ -21,6 +21,8 @@
 
 What i want add:
 
+- remote_ss runtime (через systemd-run), see [Kamal](https://kamal-deploy.org);
+  - scope политики;
 - kill running game;
 - disassemble server file;
 - multiversions;
@@ -78,10 +80,11 @@ hypha-launcher/
 
 ## Resources
 
+- [Server Manual / support.hytale.com](https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual)
 - [Mod Organizer 2 / github.com](https://github.com/ModOrganizer2/modorganizer)
 - [Vortex Mod Manager / github.com](https://github.com/Nexus-Mods/Vortex/)
-- [Pandoralauncher / github.com](https://github.com/Moulberry/PandoraLauncher/)
 - [MCreator / mcreator.net](https://mcreator.net)
-- TLauncher
+- [PrismLauncher](https://github.com/PrismLauncher/PrismLauncher)
+- [Pandoralauncher / github.com](https://github.com/Moulberry/PandoraLauncher/)
 - [Simple containers runtime - bonkers / github](https://github.com/owlpharoah/b0nkers/blob/main/src/main.rs)
 - [Algorithm logs templating - logdraing / thekeeper.io](https://thekeeper.io/blog/logdrain-log-template-mining-in-rust/)

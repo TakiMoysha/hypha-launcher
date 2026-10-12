@@ -4,7 +4,8 @@ members = [
   "crates/backend",
   "crates/frontend",
   "crates/hypha-runner",
-  # "crates/modules" # пока не реализовано
+  "crates/demo_iced_ui",
+  # "crates/modules" # wip
 ]
 
 [workspace.package]
